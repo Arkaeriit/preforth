@@ -19,3 +19,19 @@ VARIABLE IOCHAR_BUFF
 \ The next definitions might vary according to your forth implementation
 0 CONSTANT R/O
 8 BASE ! 664 CONSTANT W/O DECIMAL
+
+\ error-exit display a message to stderr and then quit the program
+\ with theexit status -1
+2 CONSTANT stderr
+: error-exit ( addr u -- ) stderr WRITE-FILE 0 EXIT-CODE ! CR BYE ;
+
+\ Interface words
+\ Open the two input files given as arguments and check if everything is OK
+: init-files ( -- fileid1 fileid2 ) 1 arg R/O OPEN-FILE 2 arg W/O CREATE-FILE ROT OR IF S" Error : argument files can't be read." error-exit THEN ;
+\ Print an help message and exit
+: help ( -- ) ." You did an oopsie." CR BYE ; 
+\ Check that the correct number of arguments is given
+: testArgs ( -- ) argc 1 = IF help THEN argc 3 = INVERT IF S" Error : invalid argument number." error-exit THEN init-files ;
+
+: MAIN testArgs ;
+
