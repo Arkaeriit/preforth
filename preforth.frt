@@ -25,9 +25,9 @@ VARIABLE IOCHAR_BUFF
 2 CONSTANT stderr
 : error-exit ( addr u -- ) stderr WRITE-FILE 0 EXIT-CODE ! CR BYE ;
 
-\ Helping function
+\ Helping words
 \ Copy the content of fileid1 into fileid2
-: copy-file ( fileid1 fileid2 -- ) BEGIN 2DUP SWAP READ-CHAR 0= IF LEAVE THEN SWAP WRITE-CHAR DROP 0 UNTIL 2DROP ;
+: copy-file ( fileid1 fileid2 -- ) BEGIN 2DUP SWAP READ-CHAR IF LEAVE THEN SWAP WRITE-CHAR DROP 0 UNTIL 2DROP ;
 \ Some bad implementation of READ-LINE
 : READ-LINE ( addr1 u1 fileid -- u2 flag ior ) 
 0 ROT 0 DO  ( The stack is addr1 fileid u2 )
@@ -72,7 +72,7 @@ VARIABLE buffer2 4095 CELLS ALLOT
 \ Tag processing words
 \ Dump the content of the file whose name is in buffer2 and length 
 \ given as an argument into the file whose descriptor is given as an argument
-: #RU ( fileid len -- ) buffer2 SWAP R/O OPEN-FILE IF SWAP copy-file ELSE DROP DROP THEN ;
+: #RU ( fileid len -- ) buffer2 SWAP R/O OPEN-FILE 0= IF SWAP copy-file ELSE DROP DROP THEN ;
 
 \ Main functions
 \ Process fileid1 and put its content into fileid1
@@ -80,3 +80,5 @@ VARIABLE buffer2 4095 CELLS ALLOT
 
 : MAIN testArgs ;
 
+\ Testing words
+: TEST_PREFORTH_1 S" Test.out" W/O CREATE-FILE DROP S" preforth.frt" DUP ROT SWAP  buffer2  SWAP CMOVE #RU ;
