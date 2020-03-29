@@ -25,6 +25,23 @@ VARIABLE IOCHAR_BUFF
 2 CONSTANT stderr
 : error-exit ( addr u -- ) stderr WRITE-FILE 0 EXIT-CODE ! CR BYE ;
 
+\ Helping function
+\ Copy the content of fileid1 into fileid2
+: copy-file ( fileid1 fileid2 -- ) BEGIN 2DUP SWAP READ-CHAR 0= IF LEAVE THEN SWAP WRITE-CHAR DROP 0 UNTIL 2DROP ;
+\ Some bad implementation of READ-LINE
+: READ-LINE ( addr1 u1 fileid -- u2 flag ior ) 
+0 ROT 0 DO  ( The stack is addr1 fileid u2 )
+    SWAP DUP READ-CHAR IF LEAVE THEN DUP 10 + IF LEAVE THEN >R  ( The stack is now addr1 u2 fileID )
+    SWAP 1+ ROT DUP R> SWAP C! 1+ ( the stack is fileid u2 addr1 and everything is up to date )
+    SWAP ROT 
+LOOP SWAP DROP SWAP DROP 0 0 ;
+\ compare two string, return 0 if there are equals. return 1 otherwize
+: COMPARE ( addr1 u1 addr2 u2 -- n ) ROT 2DUP = IF 
+    DROP 0 SWAP 0 DO
+        DROP 2DUP C@ SWAP C@ = INVERT IF 1 LEAVE THEN 1+ SWAP 1+ 0 LOOP
+    SWAP DROP SWAP DROP
+    ELSE 1 THEN ;
+
 \ Interface words
 \ Open the two input files given as arguments and check if everything is OK
 : init-files ( -- fileid1 fileid2 ) 1 arg R/O OPEN-FILE 2 arg W/O CREATE-FILE ROT OR IF S" Error : argument files can't be read." error-exit THEN ;
@@ -32,6 +49,34 @@ VARIABLE IOCHAR_BUFF
 : help ( -- ) ." You did an oopsie." CR BYE ; 
 \ Check that the correct number of arguments is given
 : testArgs ( -- ) argc 1 = IF help THEN argc 3 = INVERT IF S" Error : invalid argument number." error-exit THEN init-files ;
+
+\ Input processing words
+VARIABLE buffer 4095 CELLS ALLOT
+\ Read a line and return the number of char read or 0 in case of an error
+: read-line+ ( filed -- n ) buffer SWAP 4096 CELLS SWAP READ-LINE 0= AND 0= IF DROP 0 THEN ;
+\ Check if we can read some tags in the begining of buffer.
+\ If there is one the number of the tag is returned, otherwize 0 is returned
+\ List of tags:
+\ 1 : \ #IR : include a file recurcively
+\ 2 : \ #IN : include a file non recurcively
+: check-tag ( len -- tag ) 
+7 < IF 
+    buffer 6 S" \ #IR " COMPARE 0= IF 1 ELSE
+    buffer 6 S" \ #IN " COMPARE 0= IF 2 ELSE
+    0 THEN THEN
+ELSE 0 THEN ;
+VARIABLE buffer2 4095 CELLS ALLOT
+\ Read everything after a tag and put it in buffer2 and return it's length
+: readPostTag ( len1 -- len2 ) 6 - DUP buffer SWAP buffer2 SWAP CMOVE ;
+
+\ Tag processing words
+\ Dump the content of the file whose name is in buffer2 and length 
+\ given as an argument into the file whose descriptor is given as an argument
+: #RU ( fileid len -- ) buffer2 SWAP R/O OPEN-FILE IF SWAP copy-file ELSE DROP DROP THEN ;
+
+\ Main functions
+\ Process fileid1 and put its content into fileid1
+\ : process ( fileid1 fileid2 -- ) 
 
 : MAIN testArgs ;
 
