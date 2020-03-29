@@ -95,4 +95,5 @@ VARIABLE buffer2 4095 CELLS ALLOT
 : TEST_PREFORTH_1 S" Test.out" W/O CREATE-FILE DROP S" preforth.frt" DUP ROT SWAP  buffer2  SWAP CMOVE #RU ;
 \ Test read-line+ and READ-LINE
 : TEST_PREFORTH_2 S" preforth.frt" R/O OPEN-FILE DROP read-line+ buffer SWAP TYPE CR ;
+: TEST_PREFORTH_3 S" lol" S" lol" COMPARE . S" lol" S" xd" COMPARE . S" lol" S" lel" COMPARE . ;
 
