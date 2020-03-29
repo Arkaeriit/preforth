@@ -25,27 +25,15 @@ VARIABLE IOCHAR_BUFF
 2 CONSTANT stderr
 : error-exit ( addr u -- ) stderr WRITE-FILE 0 EXIT-CODE ! CR BYE ;
 
-\ Debuguing words
-\ Print th top of the stack
-: .? DUP . ;
-\ Print the top of the stack as a char
-: .c? DUP EMIT SPACE ;
-\ Print the two first element of the stack
-: .?? 2DUP . . ;
-\ Print the 3 first element on the stack
-: .??? .? >R .? >R .? R> R> ;
-
 \ Helping words
 \ Copy the content of fileid1 into fileid2
 : copy-file ( fileid1 fileid2 -- ) BEGIN 2DUP SWAP READ-CHAR IF LEAVE THEN SWAP WRITE-CHAR DROP 0 UNTIL 2DROP ;
 \ Some bad implementation of READ-LINE
-\ ior is alway 0 and flag is 1 if we reached the end of the file
-\ or 0 if we reached the end of a line first
 : READ-LINE ( addr1 u1 fileid -- u2 flag ior ) 
 0 ROT 0 DO  ( The stack is addr1 fileid u2 )
-    SWAP DUP READ-CHAR IF DROP SWAP NIP NIP -1 0 UNLOOP EXIT THEN DUP 10 = IF DROP SWAP LEAVE THEN >R  ( The stack is now addr1 u2 fileID )
+    SWAP DUP READ-CHAR IF LEAVE THEN DUP 10 + IF LEAVE THEN >R  ( The stack is now addr1 u2 fileID )
     SWAP 1+ ROT DUP R> SWAP C! 1+ ( the stack is fileid u2 addr1 and everything is up to date )
-    ROT ROT 
+    SWAP ROT 
 LOOP SWAP DROP SWAP DROP 0 0 ;
 \ compare two string, return 0 if there are equals. return 1 otherwize
 : COMPARE ( addr1 u1 addr2 u2 -- n ) ROT 2DUP = IF 
@@ -64,15 +52,15 @@ LOOP SWAP DROP SWAP DROP 0 0 ;
 
 \ Input processing words
 VARIABLE buffer 4095 CELLS ALLOT
-\ Read a line and return the number of char read or -1 in case of an error
-: read-line+ ( filed -- n ) buffer SWAP 4096 CELLS SWAP READ-LINE DROP OVER 0= AND IF DROP -1 THEN ;
+\ Read a line and return the number of char read or 0 in case of an error
+: read-line+ ( filed -- n ) buffer SWAP 4096 CELLS SWAP READ-LINE 0= AND 0= IF DROP 0 THEN ;
 \ Check if we can read some tags in the begining of buffer.
 \ If there is one the number of the tag is returned, otherwize 0 is returned
 \ List of tags:
 \ 1 : \ #IR : include a file recurcively
 \ 2 : \ #IN : include a file non recurcively
 : check-tag ( len -- tag ) 
-4 > IF 
+7 < IF 
     buffer 6 S" \ #IR " COMPARE 0= IF 1 ELSE
     buffer 6 S" \ #IN " COMPARE 0= IF 2 ELSE
     0 THEN THEN
@@ -84,33 +72,13 @@ VARIABLE buffer2 4095 CELLS ALLOT
 \ Tag processing words
 \ Dump the content of the file whose name is in buffer2 and length 
 \ given as an argument into the file whose descriptor is given as an argument
-: #IN ( fileid len -- ) buffer2 SWAP R/O OPEN-FILE 0= IF SWAP copy-file ELSE DROP DROP THEN ;
+: #RU ( fileid len -- ) buffer2 SWAP R/O OPEN-FILE 0= IF SWAP copy-file ELSE DROP DROP THEN ;
 
 \ Main functions
-\ Process a line of fileid1 and put the reslt in fileid2
-: process-line ( fileid1 fileid2 -- ) SWAP read-line+ DUP check-tag IF
-    DUP check-tag ( -- )
-    ELSE SWAP DUP >R SWAP buffer SWAP ROT WRITE-FILE 10 R> WRITE-CHAR THEN ;
 \ Process fileid1 and put its content into fileid1
 \ : process ( fileid1 fileid2 -- ) 
-
 
 : MAIN testArgs ;
 
 \ Testing words
-\ Test #IN and copy-file
-\ Write the content of preforth.frt into Test.out
-: TEST_PREFORTH_1 S" Test.out" W/O CREATE-FILE DROP S" preforth.frt" DUP ROT SWAP  buffer2  SWAP CMOVE #IN ;
-\ Test read-line+ and READ-LINE
-\ Print the first line of preforth.frt
-: TEST_PREFORTH_2 S" preforth.frt" R/O OPEN-FILE DROP read-line+ buffer SWAP TYPE CR ;
-\ Test COMPARE
-\ Print "0 1 1"
-: TEST_PREFORTH_3 S" lol" S" lol" COMPARE . S" lol" S" xd" COMPARE . S" lol" S" lel" COMPARE . ;
-\ Test read-line+ and check-tag
-\ Print "1 0 0"
-: TEST_PREFORTH_4 S" Test.in" R/O OPEN-FILE DROP 3 0 DO DUP read-line+ check-tag . LOOP CR ;
-\ Test read-line+, check-tag and readPostTag
-\ Print "filename"
-: TEST_PREFORTH_5 S" Test.in" R/O OPEN-FILE DROP 3 0 DO DUP read-line+ DUP check-tag IF readPostTag buffer 6 + SWAP TYPE CR ELSE DROP THEN LOOP CR ;
-
+: TEST_PREFORTH_1 S" Test.out" W/O CREATE-FILE DROP S" preforth.frt" DUP ROT SWAP  buffer2  SWAP CMOVE #RU ;
