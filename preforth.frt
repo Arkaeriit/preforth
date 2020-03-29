@@ -25,15 +25,25 @@ VARIABLE IOCHAR_BUFF
 2 CONSTANT stderr
 : error-exit ( addr u -- ) stderr WRITE-FILE 0 EXIT-CODE ! CR BYE ;
 
+\ Debuguing words
+\ Print th top of the stack
+: .? DUP . ;
+\ Print the top of the stack as a char
+: .c? DUP EMIT SPACE ;
+\ Print the two first element of the stack
+: .?? 2DUP . . ;
+\ Print the 3 first element on the stack
+: .??? .? >R .? >R .? R> R> ;
+
 \ Helping words
 \ Copy the content of fileid1 into fileid2
 : copy-file ( fileid1 fileid2 -- ) BEGIN 2DUP SWAP READ-CHAR IF LEAVE THEN SWAP WRITE-CHAR DROP 0 UNTIL 2DROP ;
 \ Some bad implementation of READ-LINE
 : READ-LINE ( addr1 u1 fileid -- u2 flag ior ) 
 0 ROT 0 DO  ( The stack is addr1 fileid u2 )
-    SWAP DUP READ-CHAR IF LEAVE THEN DUP 10 + IF LEAVE THEN >R  ( The stack is now addr1 u2 fileID )
+    SWAP DUP READ-CHAR IF DROP SWAP LEAVE THEN DUP 10 = IF DROP SWAP LEAVE THEN >R  ( The stack is now addr1 u2 fileID )
     SWAP 1+ ROT DUP R> SWAP C! 1+ ( the stack is fileid u2 addr1 and everything is up to date )
-    SWAP ROT 
+    ROT ROT 
 LOOP SWAP DROP SWAP DROP 0 0 ;
 \ compare two string, return 0 if there are equals. return 1 otherwize
 : COMPARE ( addr1 u1 addr2 u2 -- n ) ROT 2DUP = IF 
@@ -53,7 +63,7 @@ LOOP SWAP DROP SWAP DROP 0 0 ;
 \ Input processing words
 VARIABLE buffer 4095 CELLS ALLOT
 \ Read a line and return the number of char read or 0 in case of an error
-: read-line+ ( filed -- n ) buffer SWAP 4096 CELLS SWAP READ-LINE 0= AND 0= IF DROP 0 THEN ;
+: read-line+ ( filed -- n ) buffer SWAP 4096 CELLS SWAP READ-LINE OR IF DROP 0 THEN ;
 \ Check if we can read some tags in the begining of buffer.
 \ If there is one the number of the tag is returned, otherwize 0 is returned
 \ List of tags:
@@ -81,4 +91,8 @@ VARIABLE buffer2 4095 CELLS ALLOT
 : MAIN testArgs ;
 
 \ Testing words
+\ Test #RU and copy-file
 : TEST_PREFORTH_1 S" Test.out" W/O CREATE-FILE DROP S" preforth.frt" DUP ROT SWAP  buffer2  SWAP CMOVE #RU ;
+\ Test read-line+ and READ-LINE
+: TEST_PREFORTH_2 S" preforth.frt" R/O OPEN-FILE DROP read-line+ buffer SWAP TYPE CR ;
+
