@@ -70,7 +70,7 @@ VARIABLE buffer 4095 CELLS ALLOT
 \ 1 : \ #IR : include a file recurcively
 \ 2 : \ #IN : include a file non recurcively
 : check-tag ( len -- tag ) 
-7 < IF 
+4 > IF 
     buffer 6 S" \ #IR " COMPARE 0= IF 1 ELSE
     buffer 6 S" \ #IN " COMPARE 0= IF 2 ELSE
     0 THEN THEN
@@ -82,7 +82,7 @@ VARIABLE buffer2 4095 CELLS ALLOT
 \ Tag processing words
 \ Dump the content of the file whose name is in buffer2 and length 
 \ given as an argument into the file whose descriptor is given as an argument
-: #RU ( fileid len -- ) buffer2 SWAP R/O OPEN-FILE 0= IF SWAP copy-file ELSE DROP DROP THEN ;
+: #IN ( fileid len -- ) buffer2 SWAP R/O OPEN-FILE 0= IF SWAP copy-file ELSE DROP DROP THEN ;
 
 \ Main functions
 \ Process fileid1 and put its content into fileid1
@@ -92,8 +92,11 @@ VARIABLE buffer2 4095 CELLS ALLOT
 
 \ Testing words
 \ Test #RU and copy-file
-: TEST_PREFORTH_1 S" Test.out" W/O CREATE-FILE DROP S" preforth.frt" DUP ROT SWAP  buffer2  SWAP CMOVE #RU ;
+: TEST_PREFORTH_1 S" Test.out" W/O CREATE-FILE DROP S" preforth.frt" DUP ROT SWAP  buffer2  SWAP CMOVE #IN ;
 \ Test read-line+ and READ-LINE
 : TEST_PREFORTH_2 S" preforth.frt" R/O OPEN-FILE DROP read-line+ buffer SWAP TYPE CR ;
+\ Test COMPARE
 : TEST_PREFORTH_3 S" lol" S" lol" COMPARE . S" lol" S" xd" COMPARE . S" lol" S" lel" COMPARE . ;
+\ Test read-line+ and check-tag
+: TEST_PREFORTH_4 S" Test.in" R/O OPEN-FILE DROP 3 0 DO DUP read-line+ check-tag . LOOP CR ;
 
