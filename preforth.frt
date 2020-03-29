@@ -99,4 +99,6 @@ VARIABLE buffer2 4095 CELLS ALLOT
 : TEST_PREFORTH_3 S" lol" S" lol" COMPARE . S" lol" S" xd" COMPARE . S" lol" S" lel" COMPARE . ;
 \ Test read-line+ and check-tag
 : TEST_PREFORTH_4 S" Test.in" R/O OPEN-FILE DROP 3 0 DO DUP read-line+ check-tag . LOOP CR ;
+\ Test read-line+, check-tag and readPostTag
+: TEST_PREFORTH_5 S" Test.in" R/O OPEN-FILE DROP 3 0 DO DUP read-line+ DUP check-tag IF readPostTag buffer 6 + SWAP TYPE CR ELSE DROP THEN LOOP CR ;
 
