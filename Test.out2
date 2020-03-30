@@ -1,3 +1,7 @@
+Some text
+lala
+
+la
 \ The next few words are used to manipulate arguments.
 \ They may not work depending on your forth inplementation
 \ Give the number of arguments, including the name of the program
@@ -119,4 +123,9 @@ VARIABLE buffer2 4095 CELLS ALLOT
 \ Test process et process-line
 \ Execute the program from Test.in2 to Test.out2
 : TEST_PREFORTH_6 S" Test.in2" R/O OPEN-FILE DROP S" Test.out2" W/O CREATE-FILE DROP process ;
+
+da
+
+dada
+EOF
 
