@@ -60,12 +60,12 @@ LOOP SWAP DROP SWAP DROP 0 0 ;
 \ Print an help message and exit
 : help ( -- ) ." You did an oopsie." CR BYE ; 
 \ Check that the correct number of arguments is given
-: testArgs ( -- ) argc 1 = IF help THEN argc 3 = INVERT IF S" Error : invalid argument number." error-exit THEN init-files ;
+: testArgs ( -- ) argc 1 = IF help THEN argc 3 = INVERT IF S" Error : invalid argument number." error-exit THEN ;
 
 \ Input processing words
 VARIABLE buffer 4095 CELLS ALLOT
 \ Read a line and return the number of char read or -1 in case of an error
-: read-line+ ( filed -- n ) buffer SWAP 4096 CELLS SWAP READ-LINE ." ReadLine : " .??? DROP OVER 0= AND IF DROP -1 THEN ;
+: read-line+ ( filed -- n ) buffer SWAP 4096 CELLS SWAP READ-LINE DROP OVER 0= AND IF DROP -1 THEN ;
 \ Check if we can read some tags in the begining of buffer.
 \ If there is one the number of the tag is returned, otherwize 0 is returned
 \ List of tags:
@@ -94,38 +94,16 @@ VARIABLE processXT \ Cette variable sert à stoquer l'execution token de process
 \ Main functions
 \ Process a line of fileid1 and put the reslt in fileid2
 \ return 0 if everything if fine, 1 in case of an error or 2 if we ran into the #SI tag
-: process-line ( fileid1 fileid2 -- n ) SWAP read-line+ DUP -1 = IF ." END " 2DROP 1 EXIT THEN DUP check-tag IF
-    ." tag " DUP check-tag DUP .?
+: process-line ( fileid1 fileid2 -- n ) SWAP read-line+ DUP -1 = IF 2DROP 1 EXIT THEN DUP check-tag IF
+    DUP check-tag DUP 
         2 = IF DROP readPostTag #IN ELSE DUP
         1 = IF DROP readPostTag #IR ELSE DUP
         3 = IF DROP 2DROP 2 EXIT 
         THEN THEN THEN
-    ELSE ." notag " SWAP DUP >R SWAP buffer SWAP ROT WRITE-FILE DROP 10 R> WRITE-CHAR DROP THEN 0 ;
+    ELSE SWAP DUP >R SWAP buffer SWAP ROT WRITE-FILE DROP 10 R> WRITE-CHAR DROP THEN 0 ;
 \ Process fileid1 and put its content into fileid1
-: process ( fileid1 fileid2 -- ) BEGIN CR ." loopstr " 2DUP .??? process-line UNTIL 2DROP ;
+: process ( fileid1 fileid2 -- ) BEGIN 2DUP process-line UNTIL 2DROP ;
 ' process processXT !
 
-: MAIN testArgs ;
-
-\ Testing words
-\ Test #IN and copy-file
-\ Write the content of preforth.frt into Test.out
-: TEST_PREFORTH_1 S" Test.out" W/O CREATE-FILE DROP S" preforth.frt" DUP ROT SWAP  buffer2  SWAP CMOVE #IN ;
-\ Test read-line+ and READ-LINE
-\ Print the first line of preforth.frt
-: TEST_PREFORTH_2 S" preforth.frt" R/O OPEN-FILE DROP read-line+ buffer SWAP TYPE CR ;
-\ Test COMPARE
-\ Print "0 1 1"
-: TEST_PREFORTH_3 S" lol" S" lol" COMPARE . S" lol" S" xd" COMPARE . S" lol" S" lel" COMPARE . ;
-\ Test read-line+ and check-tag
-\ Print "1 0 0"
-: TEST_PREFORTH_4 S" Test.in" R/O OPEN-FILE DROP 3 0 DO DUP read-line+ check-tag . LOOP CR ;
-\ Test read-line+, check-tag and readPostTag
-\ Print "filename"
-: TEST_PREFORTH_5 S" Test.in" R/O OPEN-FILE DROP 3 0 DO DUP read-line+ DUP check-tag IF readPostTag buffer 6 + SWAP TYPE CR ELSE DROP THEN LOOP CR ;
-\ Test process et process-line
-\ Execute the program from Test.in2 to Test.out2
-: TEST_PREFORTH_6 S" Test.in2" R/O OPEN-FILE DROP S" Test.out2" W/O CREATE-FILE DROP process ;
-\ Test #IR
-: TEST_PREFORTH_7 S" Test.in3" R/O OPEN-FILE DROP S" Test.out3" W/O CREATE-FILE DROP process ;
+: MAIN testArgs init-files process ;
 
