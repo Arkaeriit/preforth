@@ -1,3 +1,15 @@
+1212
+Some text
+lala
+
+la
+\ #IN preforth.frt
+da
+
+dada
+EOF
+
+3434
 Some text
 lala
 
@@ -126,9 +138,13 @@ VARIABLE processXT \ Cette variable sert à stoquer l'execution token de process
 \ Test process et process-line
 \ Execute the program from Test.in2 to Test.out2
 : TEST_PREFORTH_6 S" Test.in2" R/O OPEN-FILE DROP S" Test.out2" W/O CREATE-FILE DROP process ;
+\ Test #IR
+: TEST_PREFORTH_7 S" Test.in3" R/O OPEN-FILE DROP S" Test.out3" W/O CREATE-FILE DROP process ;
 
 da
 
 dada
 EOF
+
+5656
 

@@ -84,19 +84,22 @@ VARIABLE buffer2 4095 CELLS ALLOT
 \ Tag processing words
 \ Dump the content of the file whose name is in buffer2 and length 
 \ given as an argument into the file whose descriptor is given as an argument
-: #IN ( fileid len -- ) buffer2 SWAP R/O OPEN-FILE 0= IF SWAP copy-file ELSE DROP DROP THEN ;
+: #IN ( fileid len -- ) buffer2 SWAP R/O OPEN-FILE 0= IF SWAP copy-file ELSE 2DROP THEN ;
+\ Same as #IN but instead of using copy-file we use process
+VARIABLE processXT \ Cette variable sert à stoquer l'execution token de process pour faire une récurtion
+: #IR ( fileid len -- ) buffer2 SWAP R/O OPEN-FILE 0= IF SWAP processXT @ EXECUTE ELSE 2DROP THEN ;
 
 \ Main functions
 \ Process a line of fileid1 and put the reslt in fileid2
 \ return 0 if everything if fine or 1 in case of an error
 : process-line ( fileid1 fileid2 -- n ) SWAP read-line+ DUP -1 = IF ." END " 2DROP 1 EXIT THEN DUP check-tag IF
     ." tag " DUP check-tag DUP .?
-        2 = IF DROP readPostTag #IN ELSE
-        THEN
+        2 = IF DROP readPostTag #IN ELSE DUP
+        1 = IF DROP readPostTag #IR THEN THEN
     ELSE ." notag " SWAP DUP >R SWAP buffer SWAP ROT WRITE-FILE DROP 10 R> WRITE-CHAR DROP THEN 0 ;
 \ Process fileid1 and put its content into fileid1
 : process ( fileid1 fileid2 -- ) BEGIN CR ." loopstr " 2DUP .??? process-line 1 = UNTIL 2DROP ;
-
+' process processXT !
 
 : MAIN testArgs ;
 
@@ -119,4 +122,6 @@ VARIABLE buffer2 4095 CELLS ALLOT
 \ Test process et process-line
 \ Execute the program from Test.in2 to Test.out2
 : TEST_PREFORTH_6 S" Test.in2" R/O OPEN-FILE DROP S" Test.out2" W/O CREATE-FILE DROP process ;
+\ Test #IR
+: TEST_PREFORTH_7 S" Test.in3" R/O OPEN-FILE DROP S" Test.out3" W/O CREATE-FILE DROP process ;
 
