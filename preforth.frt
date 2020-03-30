@@ -71,11 +71,13 @@ VARIABLE buffer 4095 CELLS ALLOT
 \ List of tags:
 \ 1 : \ #IR : include a file recurcively
 \ 2 : \ #IN : include a file non recurcively
+\ 3 : \ #SI : stop the preprocessing of the curent file
 : check-tag ( len -- tag ) 
 4 > IF 
     buffer 6 S" \ #IR " COMPARE 0= IF 1 ELSE
     buffer 6 S" \ #IN " COMPARE 0= IF 2 ELSE
-    0 THEN THEN
+    buffer 5 S" \ #SI"  COMPARE 0= IF 3 ELSE
+    0 THEN THEN THEN
 ELSE 0 THEN ;
 VARIABLE buffer2 4095 CELLS ALLOT
 \ Read everything after a tag and put it in buffer2 and return it's length
@@ -91,14 +93,16 @@ VARIABLE processXT \ Cette variable sert à stoquer l'execution token de process
 
 \ Main functions
 \ Process a line of fileid1 and put the reslt in fileid2
-\ return 0 if everything if fine or 1 in case of an error
+\ return 0 if everything if fine, 1 in case of an error or 2 if we ran into the #SI tag
 : process-line ( fileid1 fileid2 -- n ) SWAP read-line+ DUP -1 = IF ." END " 2DROP 1 EXIT THEN DUP check-tag IF
     ." tag " DUP check-tag DUP .?
         2 = IF DROP readPostTag #IN ELSE DUP
-        1 = IF DROP readPostTag #IR THEN THEN
+        1 = IF DROP readPostTag #IR ELSE DUP
+        3 = IF DROP 2DROP 2 EXIT 
+        THEN THEN THEN
     ELSE ." notag " SWAP DUP >R SWAP buffer SWAP ROT WRITE-FILE DROP 10 R> WRITE-CHAR DROP THEN 0 ;
 \ Process fileid1 and put its content into fileid1
-: process ( fileid1 fileid2 -- ) BEGIN CR ." loopstr " 2DUP .??? process-line 1 = UNTIL 2DROP ;
+: process ( fileid1 fileid2 -- ) BEGIN CR ." loopstr " 2DUP .??? process-line UNTIL 2DROP ;
 ' process processXT !
 
 : MAIN testArgs ;
