@@ -60,7 +60,7 @@ LOOP SWAP DROP SWAP DROP 0 0 ;
 \ Print an help message and exit
 : help ( -- ) ." A Forth preprocessor." CR CR
 ." Usage : preforth <input file> <output file>" CR
-." This program parse the input file, searching for some tags. If no tags is found at the begining of a line the line is copied on the output file." CR
+." This program parse the input file, searching for some tags. If no tags are found at the beginning of a line the line is copied on the output file." CR
 ." List of tags:" CR
 ."    \ #IN filename : include non-recursively. Dump the content of filename in the output file." CR
 ."    \ #IR filename : include recursively. Process filename and put the result in the output file. Similar to #include in C preprocessors." CR
