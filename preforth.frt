@@ -58,7 +58,13 @@ LOOP SWAP DROP SWAP DROP 0 0 ;
 \ Open the two input files given as arguments and check if everything is OK
 : init-files ( -- fileid1 fileid2 ) 1 arg R/O OPEN-FILE 2 arg W/O CREATE-FILE ROT OR IF S" Error : argument files can't be read." error-exit THEN ;
 \ Print an help message and exit
-: help ( -- ) ." You did an oopsie." CR BYE ; 
+: help ( -- ) ." A Forth preprocessor." CR CR
+." Usage : preforth <input file> <output file>" CR
+." This program parse the input file, searching for some tags. If no tags is found at the begining of a line the line is copied on the output file." CR
+." List of tags:" CR
+."    \ #IN filename : include non-recursively. Dump the content of filename in the output file." CR
+."    \ #IR filename : include recursively. Process filename and put the result in the output file. Similar to #include in C preprocessors." CR
+."    \ #SI : stop the inclusion. Stop the preprocessing of the file. Useful when used alongside #IR." CR BYE ; 
 \ Check that the correct number of arguments is given
 : testArgs ( -- ) argc 1 = IF help THEN argc 3 = INVERT IF S" Error : invalid argument number." error-exit THEN ;
 
