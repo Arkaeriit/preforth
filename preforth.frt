@@ -23,7 +23,7 @@ VARIABLE IOCHAR_BUFF
 \ error-exit display a message to stderr and then quit the program
 \ with theexit status -1
 2 CONSTANT stderr
-: error-exit ( addr u -- ) stderr WRITE-FILE 0 EXIT-CODE ! CR BYE ;
+: error-exit ( addr u -- ) stderr WRITE-FILE -1 EXIT-CODE ! CR BYE ;
 
 \ Debuguing words
 \ Print th top of the stack
