@@ -53,6 +53,21 @@ Some text 3
 ```
 When we included file2 with the tag #IN the tags #IN and #SI inside of file2 were ignored. But when we included it with #IR they were taken into account.
 
-## Compilation and installation
-The compilation of preforth will be different depending on your implementation of Forth. I developed it using ciforth so keep that in mind since the result of IO operations might vary from one implementation to another. Since this program only produces a single binary file from a single file the installation will be trivial. With ciforth on Linux I simply do `lina -c preforth.frt && sudo mv -f preforth /usr/local/bin` to install it.
+## Utilisation and installation
+
+Preforth is meant to be run with [Gforth](https://gforth.org) or [ASCminiForth](https://github.com/Arkaeriit/ASCminiForth) but it could works with other Forth implementation. A version working with Ciforth can be found in the git branch named `ciforth`.
+
+Here is how you can install it if you want to use Gforth:
+```sh
+sudo cp preforth.frt /usr/local/bin/
+sudo printf '#!/bin/sh\n/usr/bin/env gforth /usr/local/bin/preforth.frt "$@"\n' > /usr/local/bin/preforth
+sudo chmod +x /usr/local/bin/preforth
+```
+
+Here is how you can install it if you want to use ASCminiForth:
+```sh
+sudo printf '#!/usr/bin/env amforth\n' > /usr/local/bin/preforth
+sudo cat preforth.frt >> /usr/local/bin/preforth
+sudo chmod +x /usr/local/bin/preforth
+```
 
