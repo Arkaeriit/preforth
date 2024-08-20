@@ -60,14 +60,14 @@ Preforth is meant to be run with [Gforth](https://gforth.org) or [ASCminiForth](
 Here is how you can install it if you want to use Gforth:
 ```sh
 sudo cp preforth.frt /usr/local/bin/
-sudo printf '#!/bin/sh\n/usr/bin/env gforth /usr/local/bin/preforth.frt "$@"\n' > /usr/local/bin/preforth
+printf '#!/bin/sh\n/usr/bin/env gforth /usr/local/bin/preforth.frt "$@"\n' | sudo tee /usr/local/bin/preforth > /dev/null
 sudo chmod +x /usr/local/bin/preforth
 ```
 
 Here is how you can install it if you want to use ASCminiForth:
 ```sh
-sudo printf '#!/usr/bin/env amforth\n' > /usr/local/bin/preforth
-sudo cat preforth.frt >> /usr/local/bin/preforth
+printf '#!/usr/bin/env amforth\n' | sudo tee /usr/local/bin/preforth > /dev/null
+cat preforth.frt | sudo tee -a /usr/local/bin/preforth > /dev/null
 sudo chmod +x /usr/local/bin/preforth
 ```
 
