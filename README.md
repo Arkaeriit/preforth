@@ -55,7 +55,7 @@ When we included file2 with the tag #IN the tags #IN and #SI inside of file2 wer
 
 ## Utilisation and installation
 
-Preforth is meant to be run with [Gforth](https://gforth.org) or [ASCminiForth](https://github.com/Arkaeriit/ASCminiForth) but it could works with other Forth implementation. A version working with Ciforth can be found in the git branch named `ciforth`.
+Preforth is meant to be run with [Gforth](https://gforth.org) or [SEForth](https://github.com/Arkaeriit/SEForth) but it could works with other Forth implementation. A version working with Ciforth can be found in the git branch named `ciforth`.
 
 Here is how you can install it if you want to use Gforth:
 ```sh
@@ -64,9 +64,9 @@ printf '#!/bin/sh\n/usr/bin/env gforth /usr/local/bin/preforth.frt "$@"\n' | sud
 sudo chmod +x /usr/local/bin/preforth
 ```
 
-Here is how you can install it if you want to use ASCminiForth:
+Here is how you can install it if you want to use SEForth:
 ```sh
-printf '#!/usr/bin/env amforth\n' | sudo tee /usr/local/bin/preforth > /dev/null
+printf '#!/usr/bin/env seforth\n' | sudo tee /usr/local/bin/preforth > /dev/null
 cat preforth.frt | sudo tee -a /usr/local/bin/preforth > /dev/null
 sudo chmod +x /usr/local/bin/preforth
 ```
